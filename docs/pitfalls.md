@@ -40,6 +40,6 @@ P1 起各条迁入 `skills/<id>/references/pitfalls.md`。新增坑时两处同�
 | audio | BGM 长度不稳 / 许可 | MiniMax Music 3 长度随 seed 摆动无平台；**非商用**；用户 2026-09-05 拍板暂不进生产线 | 未量化 | auto-memory（reference_minimax_music3_local） |
 | mining | B 站下载 412 | curl_cffi 换 buvid + wbi 签名 playurl 取流；yt-dlp / 浏览器 cookies 都失败 | 412 | auto-memory（reference_bilibili_download_412_bypass） |
 | mining | git add 失败 | Windows 保留名（aux / con / nul）作文件名；提交前 `git add -n` 干跑 | 未量化 | auto-memory（reference_windows_reserved_filenames） |
-| 通用 | 大文件下载慢 / 卡死 | 默认 aria2c；直连源加 `--no-proxy="*"`；HF Xet CDN 须 `--all-proxy=http://127.0.0.1:7897` | 直连 HF Xet 0B 卡死 | auto-memory（feedback_default_download_aria2c） |
+| 通用 | 大文件下载慢 / 卡死 | 默认 aria2c；直连源加 `--no-proxy="*"`；HF Xet CDN 须 `--all-proxy=<本机代理>` | 直连 HF Xet 0B 卡死 | auto-memory（feedback_default_download_aria2c） |
 | 通用 | WebFetch 403 拿不到正文 | 兜底 `scripts/chrome_fetch.py`（真 Chrome 有头） | 未量化 | auto-memory（reference_chrome_fetch_fallback） |
 | 通用 | implementer 写大文件中途断连 | 分块写，每次 ≤250 行 | ~1500 行一次写会断 | auto-memory（reference_subagent_large_write_chunking） |
