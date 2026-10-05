@@ -1,0 +1,37 @@
+id: glb
+name: GLB 校验 / 优化
+stage: 3d-asset
+maturity: candidate   # inkexile 有契约测试，可作基准
+summary: GLB 结构 / 面数 / 材质 / 接缝校验与压缩优化、入引擎前契约检查；5 个项目各写一份
+inputs: [GLB]
+outputs: [优化后 GLB, 校验报告]
+gates:
+  - name: inkexile-asset-contract
+    path: works/inkexile/tests/assets/contract.test.ts
+    note: 资产契约测试
+  - name: check_paddy_glb
+    path: works/micro-realms/tools/check_paddy_glb.py
+    note: 项目专用
+  - name: terraweave-gltf-validate
+    path: works/terraweave/tools/asset_validate/gltf.mjs
+implementations:
+  - project: pawkov
+    path: works/pawkov/tools/char3d/optimize_glb.py
+  - project: micro-realms
+    path: works/micro-realms/tools/{check_paddy_glb,review_tile_glb,prepare_review_web}.py
+  - project: terraweave
+    path: works/terraweave/tools/asset_validate/gltf.mjs
+  - project: terraweave
+    path: works/terraweave/tools/asset_build/*.mjs
+  - project: blender-lab
+    path: works/blender-lab/tools/glb_extras.py
+  - project: inkexile
+    path: works/inkexile/scripts/asset/{ingest-*,ink-baker,seam-check,asset-contract}.ts
+  - project: inkexile
+    path: works/inkexile/tests/assets/contract.test.ts
+canonical: null
+baseline_candidate: works/inkexile/scripts/asset/asset-contract.ts   # 配 contract.test.ts
+pitfalls: []
+related_kb: [docs/kb/topics/3d-rendering-and-visual-agents.md]
+related_skills: []
+consumers: [pawkov, micro-realms, terraweave, blender-lab, inkexile]

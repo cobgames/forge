@@ -1,0 +1,43 @@
+id: comfy
+name: ComfyUI 客户端与工作流
+stage: 2d-asset
+maturity: candidate   # visual-lab 客户端有契约测试 + release，可作基准
+summary: 向本机 ComfyUI 提交 API 工作流、轮询 history、取回产物；6 个项目各写一份 HTTP 客户端
+inputs: [workflow .api.json, 参数覆盖, ComfyUI 地址]
+outputs: [图像 / 网格产物, history 记录]
+gates:
+  - name: visual-lab-contract-tests
+    path: works/visual-lab/tests/contract
+    note: 客户端契约测试，现存唯一
+implementations:
+  - project: comfy-lab
+    path: works/comfy-lab/scripts/comfy_client.py
+  - project: comfy-lab
+    path: works/comfy-lab/scripts/qwen21.py
+    notes: Qwen-Image-2.1 出图入口（非商用）
+  - project: manju-lab
+    path: works/manju-lab/pipeline/{comfy_client,imagegen}.py
+  - project: visual-lab
+    path: works/visual-lab/src/vlab/comfyui/client.py
+    notes: 唯一允许 urllib ComfyUI 的模块，含异常映射与重试
+  - project: clone-lab
+    path: works/clone-lab/scripts/generate-mesh.py
+  - project: three-lab
+    path: works/three-lab/experiments/photo-scene/pipeline/12_outpaint.py
+  - project: micro-realms
+    path: works/micro-realms/tools/reconstruct_tile.py
+canonical: null
+baseline_candidate: works/visual-lab/src/vlab/comfyui/client.py
+pitfalls:
+  - text: Qwen-Image-2.1 原生 RGBA 免抠图；int8 比 bf16 慢；同 seed 吃缓存，测速要换 seed；非商用
+    evidence: int8 实测慢于 bf16（倍数未记录）
+    source: workspace auto-memory（reference_qwen_image_2_1_local）
+  - text: imgen MCP 做风格探索 / 单张；可复现 / 受控 / 序列帧才用 ComfyUI
+    evidence: 未量化（分工规则）
+    source: workspace auto-memory（feedback_imgen_mcp_vs_comfyui）
+  - text: 8189 端口是别的 ComfyUI 实例，别碰；comfy-lab 实例 09-21 更到 v0.37
+    evidence: 未量化
+    source: workspace auto-memory（project_comfy_lab）
+related_kb: [docs/kb/patterns/llm-pipeline-checkpoints.md]
+related_skills: []
+consumers: [comfy-lab, manju-lab, visual-lab, clone-lab, three-lab, micro-realms]

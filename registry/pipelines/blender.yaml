@@ -1,0 +1,54 @@
+id: blender
+name: Blender headless 建模 / 渲染 / 转台
+stage: 3d-asset
+maturity: duplicated
+summary: 系统 Python 驱动 blender --background 跑 bpy 脚本：程序化建模、正交渲染、转台、描边、GLB 导出；9 个项目各写一份
+inputs: [bpy 脚本, 参考图 / 配置, .blend / GLB]
+outputs: [GLB, 正交 / 转台渲染 PNG, 校验报告]
+gates:
+  - name: turnaround_check
+    path: works/blender-lab/tools/turnaround_check.py
+    note: 转台一致性检查
+  - name: fidelity_harness
+    path: works/blender-lab/tools/fidelity_harness.py
+    note: 与参考图对拍
+implementations:
+  - project: blender-lab
+    path: works/blender-lab/scripts/{build_orc*,render_ortho,toon_outline}.py
+  - project: blender-lab
+    path: works/blender-lab/tools/{maskcore,ref_palette,turnaround_check,fidelity_harness,glb_extras}.py
+  - project: pawkov
+    path: works/pawkov/tools/char3d/_blender_*.py
+    notes: 8 个，char3d 链路内的 bpy 子脚本
+  - project: war3-labs
+    path: works/war3-labs/tools/model-pipeline/{build_asset,render_previews}.py
+  - project: micro-realms
+    path: works/micro-realms/tools/{build_southern_*,paddy_*,tile_concept_pipeline}.py
+  - project: terraweave
+    path: works/terraweave/scripts/blender_jiangnan_*.py
+  - project: inkexile
+    path: works/inkexile/scripts/asset/blender/build_*.py
+  - project: piano-3d
+    path: works/piano-3d/blender/build_blockout.py
+  - project: clone-lab
+    path: works/clone-lab/scripts/prepare-milo.py
+    notes: spec 未给路径；grep "import bpy" 找到此文件（未逐行核是否 headless 主入口）
+  - project: avatar-lab
+    path: works/avatar-lab/tools/render_face.py
+  - project: comfy-lab
+    path: works/comfy-lab/scripts/blender_render_fbx.py
+canonical: null
+baseline_candidate: works/blender-lab/tools/   # 唯一带 turnaround / fidelity 门的工具集
+pitfalls:
+  - text: 衣冠 mesh 槽不吃 dx/dy，要 align_to_stencil；mipmap 开关在 .atlas 的 filter 行；装饰线源图 ≥6–8px；面罩跨物种用 faceAnchor:nose
+    evidence: pawkov 衣冠件实装记录
+    source: workspace auto-memory（reference_pawkov_costume_mesh_pipeline）
+  - text: 自绘物种件不加 rim 描边（外圈略深灰边要去掉）；内部结构线照留
+    evidence: 未量化（制作人规则）
+    source: workspace auto-memory（feedback_self_drawn_species_no_rim）
+  - text: LoRA 训练集绝不用有缺陷 / 没达预期的图
+    evidence: 未量化（garbage in garbage out）
+    source: workspace auto-memory（feedback_lora_trainset_quality）
+related_kb: [docs/kb/topics/3d-rendering-and-visual-agents.md, docs/kb/patterns/fidelity-vs-consistency-tradeoff.md]
+related_skills: []
+consumers: [blender-lab, pawkov, war3-labs, micro-realms, terraweave, inkexile, piano-3d, clone-lab, avatar-lab, comfy-lab]

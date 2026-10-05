@@ -1,0 +1,40 @@
+id: img2three
+name: 图生 3D（TRELLIS.2 / Hunyuan3D）
+stage: 3d-asset
+maturity: duplicated
+summary: 单图 → 网格的 ComfyUI 工作流（TRELLIS.2 / Hy3D）；依赖 comfy 管线；5 个项目各存一份工作流
+inputs: [源图 PNG, workflow .api.json, seed]
+outputs: [GLB 网格, 元数据（仅 three-lab / war3-labs 有）]
+gates:
+  - name: null-gate
+    path: null
+    note: 无可执行门；P2 计划 .gen3d.json sidecar（源图 hash / 工作流 / seed / 面数 / rig 状态）
+implementations:
+  - project: blender-lab
+    path: works/blender-lab/assets/_work/char-from-image/p2_D/workflows/*.api.json
+    notes: 在 gitignore 的 _work 内
+  - project: clone-lab
+    path: works/clone-lab/scripts/workflows/trellis2-1024.api.json
+    notes: 入 git 的一份
+  - project: war3-labs
+    path: works/war3-labs/_work/models/*/wf_trellis2.api.json
+    notes: 在 gitignore 的 _work 内，每模型一份
+  - project: three-lab
+    path: works/three-lab/experiments/photo-scene/pipeline/09_manor_hy3d.py
+  - project: pawkov
+    path: works/pawkov/tools/char3d/gen_mesh.py
+canonical: null
+baseline_candidate: works/clone-lab/scripts/workflows/trellis2-1024.api.json   # 唯一入 git 的 TRELLIS.2 工作流
+pitfalls:
+  - text: Qwen-Image-2.1 原生 RGBA 免抠图；int8 比 bf16 慢；同 seed 吃缓存，测速要换 seed；非商用
+    evidence: int8 实测慢于 bf16（倍数未记录）
+    source: workspace auto-memory（reference_qwen_image_2_1_local）
+  - text: imgen MCP 做风格探索 / 单张；可复现 / 受控 / 序列帧才用 ComfyUI
+    evidence: 未量化（分工规则）
+    source: workspace auto-memory（feedback_imgen_mcp_vs_comfyui）
+  - text: 8189 端口是别的 ComfyUI 实例，别碰；comfy-lab 实例 09-21 更到 v0.37
+    evidence: 未量化
+    source: workspace auto-memory（project_comfy_lab）
+related_kb: [docs/kb/topics/3d-rendering-and-visual-agents.md]
+related_skills: []
+consumers: [blender-lab, clone-lab, war3-labs, three-lab, pawkov]

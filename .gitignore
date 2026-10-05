@@ -1,0 +1,4 @@
+catalog/out/
+shared-assets/
+__pycache__/
+*.sqlite

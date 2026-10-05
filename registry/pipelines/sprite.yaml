@@ -1,0 +1,54 @@
+id: sprite
+name: 精灵归一化 / sheet↔gif / 图集打包
+stage: animation
+maturity: duplicated
+summary: 关键帧对齐（feet-pin）、拼 sheet、出预览 gif、打图集；9 个项目各写一份
+inputs: [逐帧 PNG / sheet, 帧率]
+outputs: [对齐帧, sheet, gif, atlas + 描述文件]
+gates:
+  - name: feet-pin-drift
+    path: null
+    note: 应有——检查逐帧脚底 y 漂移（现在只在脚本里打印，未做成门）
+implementations:
+  - project: comfy-lab
+    path: works/comfy-lab/scripts/{imgen_anim_normalize,assemble_sheet,make_gif,sheet_to_gif}.py
+    notes: imgen_anim_normalize 含白底 flood-fill 抠 + 锁 feetY + defringe
+  - project: micro-realms
+    path: works/micro-realms/scripts/make_gif.py
+  - project: quietfarm
+    path: works/quietfarm/tools/normalize_pot.py
+  - project: zcds
+    path: works/zcds/h5/scripts/spritesheet-normalize.mjs
+  - project: zcds
+    path: works/zcds/h5/scripts/qc_*_sheet.py
+    notes: contact sheet 质检
+  - project: pawkov
+    path: works/pawkov/net/scripts/pack_costume_atlas.py
+  - project: xmlt
+    path: works/xmlt/tools/process_character_select_fx_atlas.py
+  - project: war3-labs
+    path: works/war3-labs/tools/bake-crowd-atlas.mts
+  - project: typing_farmer
+    path: works/typing_farmer/tools/unity_to_spritekit/{06_pack_animal,07_pack_all}.py
+  - project: vampire_crawlers
+    path: works/vampire_crawlers/h5/scripts/pack_assets.py
+  - project: anim-lab
+    path: works/anim-lab/experiments/topdown/{assemble_*,retarget_rig,build_topdown_spine}.py
+canonical: null
+baseline_candidate: works/comfy-lab/scripts/imgen_anim_normalize.py   # 唯一把 feet-pin + 抠白 + defringe 合在一处
+pitfalls:
+  - text: 抖动靠后处理钉脚底，不靠 prompt；稳定 = 锁 feetY 锚点而非锁尺寸
+    evidence: normalize 平移 pin 脚底后漂移 271px → 1px
+    source: workspace auto-memory（feedback_sprite_jitter_postprocess_not_prompt）
+  - text: 呼吸动画不用整体 scale；上半身微动 + 下半身锁定
+    evidence: 未量化（制作人规则）
+    source: workspace auto-memory（feedback_breathing_no_scale）
+  - text: 系列出图先定一个 anchor 标准物，再 ref 它生成其余
+    evidence: 不定 anchor 时尺寸 / 构图 / 风格各自漂
+    source: workspace auto-memory（feedback_series_anchor_standard）
+  - text: 同稀有度跨类型边框 / 件坐标必须一致；同 master ref 生成后 harness 比对
+    evidence: 跨类型不一致时失去整体产品感
+    source: workspace auto-memory（feedback_cross_type_frame_consistency）
+related_kb: [docs/kb/patterns/image-asset-processing.md, docs/kb/patterns/character-animation-three-track.md]
+related_skills: []
+consumers: [comfy-lab, micro-realms, quietfarm, zcds, pawkov, xmlt, war3-labs, typing_farmer, vampire_crawlers, anim-lab]

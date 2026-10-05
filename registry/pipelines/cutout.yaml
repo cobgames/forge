@@ -1,0 +1,55 @@
+id: cutout
+name: 抠图与去边
+stage: 2d-asset
+maturity: duplicated
+summary: 白底 / 洋红底 / 绿幕 PNG → RGBA，含 defringe 去边与洋红底校验；7 个项目各写一份
+inputs: [白底 PNG, 洋红底 PNG, 绿幕 PNG]
+outputs: [RGBA PNG, 校验报告]
+gates:
+  - name: check_cutout
+    path: works/pawkov/net/scripts/check_cutout.py
+    note: 在洋红底上验内部困白与 alpha 碎岛
+implementations:
+  - project: xmlt
+    path: works/xmlt/tools/clay_*_process.py
+    notes: 洋红抠图原版，tools/ 下 12 个（spec 记 17 个，未找到其余 5 个）；poelike chroma_key.py 由此移植
+  - project: xmlt
+    path: works/xmlt/tools/{ui_kit_cut,tile_kit_split}.py
+    notes: UI kit / tile kit 切件
+  - project: quietfarm
+    path: works/quietfarm/tools/{cut_chroma,cut_magenta,add_outline}.py
+  - project: poelike
+    path: works/poelike/assets/_work/{chroma_key,matte_sprite,matte_frame}.py
+    notes: 在 gitignore 的 _work 内
+  - project: poelike
+    path: works/poelike/game/matte_actors.py
+  - project: pawkov
+    path: works/pawkov/net/scripts/{cutout_white,check_cutout,clean_islands}.py
+    notes: 白底抠 + 洋红底校验 + 碎岛清理，唯一自带 check 的一份
+  - project: pawkov
+    path: works/pawkov/h5/scripts/art_pipeline/*.py
+    notes: h5 旧线（已冻结）的批处理脚本
+  - project: war3-labs
+    path: works/war3-labs/tools/icons/cutout_icons.py
+  - project: anim-lab
+    path: works/anim-lab/experiments/topdown/cut_sheet.py
+  - project: zcds
+    path: works/zcds/h5/scripts/spritesheet-normalize.mjs
+canonical: null
+baseline_candidate: works/pawkov/net/scripts/cutout_white.py   # 功能最全（defringe + 碎岛）且配 check_cutout.py
+pitfalls:
+  - text: 抠图后必须腐蚀 alpha 边缘约 2px 去白边光晕（defringe 是固定一环）
+    evidence: 不去边入引擎有白色光晕
+    source: workspace auto-memory（feedback_cut_pipeline_defringe）
+  - text: 抠完必须在洋红底上验，白底看不出内部困白 / alpha 碎岛；check_cutout.py 当闸
+    evidence: 白底上看不出内部困白 / alpha 碎岛
+    source: workspace auto-memory（feedback_cutout_verify_on_chroma）
+  - text: 白主色图用绿幕 chroma 而非白底；四套方法按图选：硬边腐蚀 / 发光反预乘 / 含内部白 flood-fill / 绿幕
+    evidence: 未量化
+    source: workspace auto-memory（reference_white_screen_unpremultiply_keying）
+  - text: 棋盘 tile 不从场景图抠；用几何程序化 + 材质 AI + 程序化辉光边
+    evidence: 从场景图抠的 tile 拼接后接缝出黑锯齿块
+    source: workspace auto-memory（feedback_tile_not_cut_from_scene）
+related_kb: [docs/kb/patterns/image-asset-processing.md]
+related_skills: []
+consumers: [xmlt, quietfarm, poelike, pawkov, war3-labs, anim-lab, zcds]

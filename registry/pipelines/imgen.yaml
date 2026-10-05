@@ -1,0 +1,42 @@
+id: imgen
+name: AI 生图（imgen MCP + CLI）
+stage: 2d-asset
+maturity: consolidated   # 全仓唯一单一实现，forge 样板（ADR-0011）
+summary: gpt-image 系生图的单一实现，MCP + CLI 双入口，.gen.json 旁路记录 prompt/模型/参数，imgen_batch.py 多 key 并行
+inputs: [prompt, 参考图（可选）, batch 清单]
+outputs: [PNG, <slug>__vN.gen.json 旁路]
+gates:
+  - name: null-gate
+    path: null
+    note: 无可执行门；.gen.json 旁路只是来源记录，不校验画面
+implementations:
+  - project: workspace-skill
+    path: .claude/skills/image-generation/SKILL.md
+    notes: skill 入口，P2 迁入 forge 时保留原路径符号链接
+  - project: workspace-skill
+    path: .claude/skills/image-generation/scripts/imgen_batch.py
+    notes: 多 key × 多模型并行批量出图
+canonical: null
+baseline_candidate: .claude/skills/image-generation/
+pitfalls:
+  - text: background=transparent 会 502；改纯白底渲染 + 后期抠白
+    evidence: 透明底参数请求 502
+    source: workspace auto-memory（reference_imgen_no_transparent_bg）
+  - text: size=auto + prompt 写明 9:16 能出真 9:16，不要自己 outpaint
+    evidence: gpt-image-2 auto 直接出 9:16
+    source: workspace auto-memory（reference_imgen_9_16_via_auto）
+  - text: 画英气女角不写性别默认成男；先写 unmistakably a WOMAN + her + 女性体征，再加英气修饰，每镜重写否则回漂
+    evidence: androgynous 会主导出男性
+    source: workspace auto-memory（reference_imgen_gender_lock_before_modifier）
+  - text: n>1 中转层坏；并发上限 per-key × per-model 可叠加，批量走 imgen_batch.py 多 key
+    evidence: 5 key × 3 模型实测约 14x
+    source: workspace auto-memory（reference_imgen_parallel_capacity）
+  - text: AI 出图守不住精确比例，精确比例只能合成 / 引擎实现
+    evidence: prompt 写死 1:1 / 2:3 也守不住
+    source: workspace auto-memory（feedback_ai_image_no_exact_ratio）
+  - text: 「脏」有两种成因：明度脏（删 muted/vignette，加 luminous/limited-palette）与密度脏（满屏铺满零留白，正向留白词压不过反向堆料词）
+    evidence: 图已提亮仍显乱；正向留白词压不过反向堆料词
+    source: workspace auto-memory（feedback_image_luminous_not_muddy / feedback_image_dirty_is_density_not_only_luminance）
+related_kb: [docs/kb/decisions/0011-shared-image-gen-tool.md, docs/kb/patterns/image-asset-processing.md]
+related_skills: [image-generation]
+consumers: [micro-realms, manju-lab, war3-labs, poelike, pawkov, inkexile, quietfarm, blender-lab, dragon-cliff-three]

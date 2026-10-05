@@ -1,0 +1,37 @@
+id: audio
+name: 配音（TTS）与 BGM
+stage: audio
+maturity: duplicated
+summary: 本机四家 TTS 引擎的启动契约与调用、BGM 生成与锁定；引擎实例在 workspace git 外
+inputs: [台词文本, 参考音色 + prompt_text, BGM 描述]
+outputs: [WAV / MP3 配音, BGM 音轨]
+gates:
+  - name: prompt-text-check
+    path: null
+    note: 应有——参考音频的 prompt_text 须与原音逐字一致，目前靠人工听
+implementations:
+  - project: manju-lab
+    path: works/manju-lab/pipeline/{audio,direct,bgm_gen,bgm_lock}.py
+  - project: soulbox
+    path: works/soulbox/scripts/start-{fish-speech,gpt-sovits,voicebox,voxcpm}.ps1
+    notes: 四家 TTS 启动脚本
+  - project: soulbox
+    path: works/soulbox/tools/persona-bench/*voice*.py
+  - project: comfyui-runtime
+    path: D:/maxb_workspace/comfyui-runtime/tts
+    notes: 引擎实例与独立 venv，在 workspace git 外；换机器不存在
+canonical: null
+baseline_candidate: works/manju-lab/pipeline/audio.py   # 唯一进过生产线（多集出片）的一份
+pitfalls:
+  - text: 语音文件名 ≠ 逐字转写；voice cloning 的 prompt_text 必须听原文校验
+    evidence: 未量化
+    source: workspace auto-memory（feedback_filename_not_transcription）
+  - text: CosyVoice3 有 endofprompt / instruct 坑；Fish 占 19G 显存须单独批
+    evidence: Fish 19G
+    source: workspace auto-memory（reference_tts_engines_local）
+  - text: MiniMax Music 3 长度随 seed 摆动、无平台期；非商用；用户 2026-09-05 拍板暂不进生产线
+    evidence: 未量化（长度随 seed 摆动）
+    source: workspace auto-memory（reference_minimax_music3_local）
+related_kb: []
+related_skills: []
+consumers: [manju-lab, soulbox]

@@ -1,0 +1,40 @@
+id: char3d
+name: 3D 角色绑骨 / 重定向（Mixamo）
+stage: animation
+maturity: duplicated
+summary: 网格 → Mixamo autorig → 拉动画 → 合并 / 优化 GLB → 转台验收；3 个项目各写一份
+inputs: [角色网格 GLB / FBX, 动画清单]
+outputs: [带骨骼与动画的 GLB, 转台渲染]
+gates:
+  - name: verify_fbx
+    path: works/pawkov/tools/char3d/verify_fbx.py
+    note: FBX 骨骼 / 动画完整性检查
+implementations:
+  - project: pawkov
+    path: works/pawkov/tools/char3d/{autorig,mixamo_*,optimize_glb,render_turntable,merge_glb}.py
+    notes: 全链路，含 README；spec 写 turntable，实际文件名 render_turntable.py
+  - project: war3-labs
+    path: works/war3-labs/tools/model-pipeline/rig_mixamo_fit.py
+  - project: avatar-lab
+    path: works/avatar-lab/app/src/vendor/loadMixamoAnimation.js
+    notes: 运行时加载 Mixamo 动画到 VRM
+  - project: comfy-lab
+    path: works/comfy-lab/scripts/blender_render_fbx.py
+canonical: null
+baseline_candidate: works/pawkov/tools/char3d/   # 唯一全链路 + verify_fbx
+pitfalls:
+  - text: 衣冠 mesh 槽不吃 dx/dy，要 align_to_stencil；mipmap 开关在 .atlas 的 filter 行；装饰线源图 ≥6–8px；面罩跨物种用 faceAnchor:nose
+    evidence: pawkov 衣冠件实装记录
+    source: workspace auto-memory（reference_pawkov_costume_mesh_pipeline）
+  - text: 自绘物种件不加 rim 描边
+    evidence: 未量化（制作人规则）
+    source: workspace auto-memory（feedback_self_drawn_species_no_rim）
+  - text: Tripo：v2.x rigger 人形 0/16；--animate-in-place 毁烘焙；v1.0 retarget 必须 FBX
+    evidence: 人形 rig 成功 0/16
+    source: docs/projects/threejs-game-skills
+  - text: LoRA 训练集绝不用有缺陷图
+    evidence: 未量化（garbage in garbage out）
+    source: workspace auto-memory（feedback_lora_trainset_quality）
+related_kb: [docs/kb/patterns/character-animation-three-track.md, docs/projects/threejs-game-skills/architecture.md]
+related_skills: []
+consumers: [pawkov, war3-labs, avatar-lab, comfy-lab]

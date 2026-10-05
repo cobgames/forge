@@ -1,0 +1,76 @@
+id: shots
+name: 浏览器截图验收
+stage: acceptance
+maturity: duplicated
+summary: 起本地页面 → 等渲染就绪 → 按视口截图落盘，供肉眼 / 回归比对；14 个项目各写一份
+# 另有 8 个项目不走 Playwright，直接调无头 Chrome --headless --screenshot
+# （poelike 19 处、inkexile 9、little-worlds 4 …），两套并存，未逐条列入下表。
+inputs: [本地 URL / 路由, 视口清单, 等待条件]
+outputs: [PNG 截图, 可选回归 diff]
+gates:
+  - name: three-lab-regress
+    path: works/three-lab/regress.mjs
+    note: 现存唯一带回归基线的截图脚本
+implementations:
+  - project: pawkov
+    path: works/pawkov/net/scripts/screenshot_*.cjs
+    notes: 约 26 个（ADR-0013 盘点称约 60，含其它目录）
+  - project: pawkov
+    path: works/pawkov/net/packages/client3d/tools/shots_*.mjs
+    notes: client3d 侧 15 个
+  - project: three-lab
+    path: works/three-lab/regress.mjs
+    notes: 回归基线
+  - project: quietfarm
+    path: works/quietfarm/tools/shot*.ts
+  - project: poelike
+    path: works/poelike/games/*/scripts/shot_*.mjs
+  - project: terraweave
+    path: works/terraweave/apps/web/scripts/shot-*.mjs
+  - project: war3-labs
+    path: works/war3-labs/tools/s*-shots.mjs
+    notes: spec 原写 tools/**/s*-shots.mjs，实际在 tools/ 根下
+  - project: war3-labs
+    path: works/war3-labs/tools/assets-*-shots.mjs
+  - project: inkexile
+    path: works/inkexile/scripts/shoot-*.mjs
+  - project: micro-realms
+    path: works/micro-realms/scripts/shots.mjs
+  - project: img2three-lab
+    path: works/img2three-lab/scripts/capture.mjs
+  - project: blender-lab
+    path: works/blender-lab/runtime/*/scripts/shots.mjs
+  - project: little-worlds
+    path: works/little-worlds/h5/scripts/verify-*.mjs
+  - project: dragon-cliff-three
+    path: works/dragon-cliff-three/h5/scripts/browser/*.mjs
+  - project: zcds
+    path: works/zcds/h5/scripts/smoke_screenshot.mjs
+    notes: spec 未给路径，Glob 找到此文件
+  - project: clone-lab
+    path: works/clone-lab/scripts/verify-browser.mjs
+    notes: spec 原写 works/clone-lab/verify-browser.mjs，实际在 scripts/ 下
+canonical: null
+baseline_candidate: works/three-lab/regress.mjs   # + 参考外部 threejs-game-skills 的状态握手契约
+pitfalls:
+  - text: 验收截图须含制作人 4K 视口（3840×1907），默认 1080p + 4K 两套；DOM UI 须随视口缩放，不能裸 px
+    evidence: 制作人浏览器 3840×1907，只截 1080p 漏掉缩放问题
+    source: workspace auto-memory（feedback_screenshot_at_producer_resolution）
+  - text: 先确认渲染的是目标素材本身而非背景 / 它件冒充；三处都对却异常时用 tint / 纯色探针排查
+    evidence: 一行多语句的行尾注释吞掉 addChild
+    source: workspace auto-memory（feedback_verify_rendered_asset_not_proxy）
+  - text: 本地 file:// 的 <img> 当 WebGL 纹理会跨源报错空白；改 data-URI 或起服务器
+    evidence: texImage2D 跨源报错，Canvas2D 不受影响
+    source: workspace auto-memory（reference_webgl_fileurl_datauri）
+  - text: 端口冲突：pawkov 8378/8380/8381/8388 与 blender-lab 8381 撞，启动前扫端口
+    evidence: 未量化
+    source: workspace auto-memory（reference_pawkov_ports_8381_collision）
+  - text: MCP 浏览器窗口 hidden 会让画布全黑
+    evidence: dragon-cliff-three 截图全黑
+    source: workspace auto-memory（project_dragon_cliff_three）
+  - text: headless shell 是 SwiftShader，FPS 数字作废；并行多个 WebGL 上下文时游戏时间会漂移
+    evidence: 外部项目记录（作者自述）
+    source: docs/projects/threejs-game-skills
+related_kb: [docs/kb/patterns/frame-grounded-verification.md, docs/kb/topics/browser-automation-in-this-workspace.md, docs/projects/threejs-game-skills/architecture.md]
+related_skills: []
+consumers: [pawkov, three-lab, quietfarm, poelike, terraweave, war3-labs, inkexile, micro-realms, img2three-lab, blender-lab, little-worlds, dragon-cliff-three, zcds, clone-lab]

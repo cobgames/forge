@@ -1,0 +1,37 @@
+id: compare
+name: 拼图对比（montage / _COMPARE_）
+stage: acceptance
+maturity: duplicated
+summary: 多张候选 / 多视角图并排加标签拼成一张 _COMPARE_ 图，用于方向挑选与决策追溯
+inputs: [多张 PNG, 标签]
+outputs: [_COMPARE_*.png]
+gates:
+  - name: null-gate
+    path: null
+    note: 无可执行门；产物是给人看的证据
+implementations:
+  - project: blender-lab
+    path: works/blender-lab/tools/montage.py
+    notes: 通用 CLI（--cols/--label/--cell-w），输入可只写文件名
+  - project: avatar-lab
+    path: works/avatar-lab/app/tools/montage.py
+  - project: sultans-game
+    path: works/sultans-game/scripts/montage.py
+    notes: 568 行，项目专用成分较多（未逐行核）
+  - project: terraweave
+    path: works/terraweave/scripts/montage_compare.py
+  - project: pawkov
+    path: works/pawkov/net/scripts/montage_*.py
+  - project: inkexile
+    path: works/inkexile/scripts/make-compare.py
+  - project: war3-labs
+    path: works/war3-labs/tools/icons/s5_items_compare.py
+  - project: manju-lab
+    path: works/manju-lab/**/_build_compare*.py
+    notes: 散在 out/ 与 productions/ 下，约 10 份一次性脚本
+canonical: null
+baseline_candidate: works/blender-lab/tools/montage.py   # 通用参数化 CLI，其余多为一次性
+pitfalls: []
+related_kb: [docs/kb/patterns/frame-grounded-verification.md]
+related_skills: []
+consumers: [blender-lab, avatar-lab, sultans-game, terraweave, pawkov, inkexile, war3-labs, manju-lab]

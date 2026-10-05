@@ -1,0 +1,49 @@
+id: mining
+name: Unity / 小程序逆向抽取
+stage: mining
+maturity: candidate   # 已有 unity-asset-mining skill 可作基准
+summary: IL2CPP dump、bundle 解包、热更 / 配置解密、Spine 与贴图抽取、本地化索引；4 个研究项目各写一份
+inputs: [游戏安装目录 / apk / wxapkg]
+outputs: [解包资产, dump 符号, 配置表 JSON（产物私有）]
+gates:
+  - name: null-gate
+    path: null
+    note: 无可执行门
+implementations:
+  - project: workspace-skill
+    path: .claude/skills/unity-asset-mining/SKILL.md
+    notes: 已是 skill，P2 迁入 forge 时保留原路径符号链接
+  - project: moonnight
+    path: works/moonnight/research/tools/{hotfix_decrypt,il2cpp_dumper,luban_reader,unpack_bundles,yoo_manifest,extract_spine}
+  - project: zcds
+    path: works/zcds/research/tools/{unpack_wxapkg,il2cpp_dumper}
+  - project: zcds
+    path: works/zcds/research/tools/extract_assets/*spine*
+  - project: vampire_crawlers
+    path: works/vampire_crawlers/research/tools/{il2cpp_dumper,odin_*,p7_asset_ripe,p8_native}
+  - project: taskbar_hero
+    path: works/taskbar_hero/research/tools/taskbar_hero_extract/*
+  - project: taoyuan-research
+    path: works/taoyuan-research/scripts/{extract_bundles,find_unitycn_key,try_xxtea}.py
+  - project: xmlt
+    path: works/xmlt/tools/cropdeck_extract_cs/build_loc_index.py
+    notes: build_loc_index.py 三份之一
+  - project: pawkov
+    path: works/pawkov/research/tools/duckov_extract/build_loc_index.py
+    notes: build_loc_index.py 三份之一
+  - project: taskbar_hero
+    path: works/taskbar_hero/research/tools/taskbar_hero_extract/build_loc_index.py
+    notes: build_loc_index.py 三份之一
+# Il2CppDumper 二进制 moonnight / zcds / vampire_crawlers 各存一份（research/tools/il2cpp_dumper/）
+canonical: null
+baseline_candidate: .claude/skills/unity-asset-mining/
+pitfalls:
+  - text: B 站下载绕 412：curl_cffi 换 buvid + wbi 签名 playurl 取流；yt-dlp / 浏览器 cookies 都失败
+    evidence: yt-dlp 与浏览器 cookies 均 412
+    source: workspace auto-memory（reference_bilibili_download_412_bypass）
+  - text: Windows 保留名（aux / con / nul）作文件名会让 git add 失败；提交前 git add -n 干跑
+    evidence: tsc / vitest 照跑，git add 报错
+    source: workspace auto-memory（reference_windows_reserved_filenames）
+related_kb: []
+related_skills: [unity-asset-mining]
+consumers: [moonnight, zcds, vampire_crawlers, taskbar_hero, taoyuan-research, xmlt, pawkov]
